@@ -143,6 +143,11 @@ function legacyParsers(data) {
 }
 
 function convert(data) {
+
+    if (argv.v) {
+            process.stdout.write('convert\n');
+    }
+
     var geojson = osmtogeojson(data, {
         flatProperties: !enhanced_geojson,
         verbose: argv.v
@@ -151,6 +156,11 @@ function convert(data) {
 }
 
 function output(geojson) {
+
+    if (argv.v) {
+            process.stdout.write('output\n');
+    }
+
     // this is much faster than a simple JSON.stringify of the whole geojson
     // object. also, this is less memory intensive and output starts right
     // after the conversion without any additional delay
