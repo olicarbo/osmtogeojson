@@ -47,6 +47,16 @@ if (format === 'json' && filename) {
 // fall back to autodetection if still no format
 if (!format) format = 'auto';
 
+var dataSize = 0;
+var totalSize = filename ? fs.statSync(filename).size : 0;
+if (argv.v) {
+    var verbFilename = filename ? filename : 'stdin';
+    process.stdout.write('---- Start processing ['+ verbFilename +'] ----');
+    process.stdout.write(' Format: ' + format + '');
+    process.stdout.write(' Size: ' + totalSize + '');
+    process.stdout.write('---- ---- ---- ---- ---- ---- ---- ---- ---- ----');
+}
+
 var datastream = (filename ? fs.createReadStream(filename) : process.stdin);
 
 // use streaming parsers if format is already known
@@ -73,9 +83,23 @@ case 'osm':
 case 'streamxml':
     datastream
     .on('data', function(chunk) {
+
+        dataSize += chunk.length;
+        if (argv.v) {
+            var verbDoneRatio = totalSize > 0 ? (dataSize / totalSize) * 100 + ' %': '- %';
+            process.stdout.write('data [' + chunk.length + ']');
+            process.stdout.write(' Total: ' + dataSize + '');
+            process.stdout.write(' Ratio: ' + verbDoneRatio + '');
+        }
+
         osmxmlParser.write(chunk);
     })
     .on('end', function() {
+
+        if (argv.v) {
+            process.stdout.write('data end');
+        }
+
         osmxmlParser.end();
         data = osmxmlParser.getJSON();
         convert(data);
