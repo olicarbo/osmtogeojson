@@ -53,7 +53,7 @@ if (argv.v) {
     var verbFilename = filename ? filename : 'stdin';
     process.stdout.write('\n\n---- Start processing ['+ verbFilename +'] ----\n');
     process.stdout.write(' Format: ' + format + '\n');
-    process.stdout.write(' Size: ' + totalSize + '\n');
+    process.stdout.write(' Size: ' + sizeToString(totalSize, 2) + '\n');
     process.stdout.write('---- ---- ---- ---- ---- ---- ---- ---- ---- ----\n\n');
 }
 
@@ -87,9 +87,9 @@ case 'streamxml':
         dataSize += chunk.length;
         if (argv.v) {
             var verbDoneRatio = totalSize > 0 ? (dataSize / totalSize) * 100 + ' %': '- %';
-            process.stdout.write('data [' + chunk.length + ']\n');
-            process.stdout.write(' Total: ' + dataSize + '\n');
-            process.stdout.write(' Ratio: ' + verbDoneRatio + '\n');
+            process.stdout.write('data [' + sizeToString(chunk.length, 2) + ']\n');
+            process.stdout.write(' Total: ' + sizeToString(dataSize, 2) + '\n');
+            process.stdout.write(' Ratio: ' + round(verbDoneRatio, 2) + '\n');
         }
 
         osmxmlParser.write(chunk);
@@ -164,4 +164,28 @@ function output(geojson) {
             process.stdout.write(',\n');
     });
     process.stdout.write('\n]\n}\n');
+}
+
+function sizeToString(size, digits)
+{
+    var sizeGb = round(size / 1073741824, digits == -1 ? 100 : digits);
+    var sizeMb = round(size / 1048576, digits == -1 ? 100 : digits);
+    var sizeKb = round(size / 1024, digits == -1 ? 100 : digits);
+
+    var sizeString = '0';
+    if (sizeGb > 1) {
+        sizeString = sizeGb + 'Gb';
+    } else if (sizeMb > 1) {
+        sizeString = sizeMb + 'Mb';
+    } else if (sizeKb > 1) {
+        sizeString = sizeKb + 'Kb';
+    } else {
+        sizeString = size + ' b';
+    }
+
+    return sizeString;
+}
+
+function round(x, digits){
+  return parseFloat(x.toFixed(digits));
 }
