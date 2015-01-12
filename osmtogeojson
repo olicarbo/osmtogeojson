@@ -86,10 +86,10 @@ case 'streamxml':
 
         dataSize += chunk.length;
         if (argv.v) {
-            var verbDoneRatio = totalSize > 0 ? (dataSize / totalSize) * 100 + ' %': '- %';
+            var verbDoneRatio = totalSize > 0 ? round((dataSize / totalSize) * 100, 2) + ' %': '- %';
             process.stdout.write('data [' + sizeToString(chunk.length, 2) + ']\n');
             process.stdout.write(' Total: ' + sizeToString(dataSize, 2) + '\n');
-            process.stdout.write(' Ratio: ' + round(verbDoneRatio, 2) + '\n');
+            process.stdout.write(' Ratio: ' + verbDoneRatio + '\n');
         }
 
         osmxmlParser.write(chunk);
