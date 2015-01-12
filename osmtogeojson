@@ -51,10 +51,10 @@ var dataSize = 0;
 var totalSize = filename ? fs.statSync(filename).size : 0;
 if (argv.v) {
     var verbFilename = filename ? filename : 'stdin';
-    process.stdout.write('---- Start processing ['+ verbFilename +'] ----');
-    process.stdout.write(' Format: ' + format + '');
-    process.stdout.write(' Size: ' + totalSize + '');
-    process.stdout.write('---- ---- ---- ---- ---- ---- ---- ---- ---- ----');
+    process.stdout.write('\n\n---- Start processing ['+ verbFilename +'] ----\n');
+    process.stdout.write(' Format: ' + format + '\n');
+    process.stdout.write(' Size: ' + totalSize + '\n');
+    process.stdout.write('---- ---- ---- ---- ---- ---- ---- ---- ---- ----\n\n');
 }
 
 var datastream = (filename ? fs.createReadStream(filename) : process.stdin);
@@ -87,9 +87,9 @@ case 'streamxml':
         dataSize += chunk.length;
         if (argv.v) {
             var verbDoneRatio = totalSize > 0 ? (dataSize / totalSize) * 100 + ' %': '- %';
-            process.stdout.write('data [' + chunk.length + ']');
-            process.stdout.write(' Total: ' + dataSize + '');
-            process.stdout.write(' Ratio: ' + verbDoneRatio + '');
+            process.stdout.write('data [' + chunk.length + ']\n');
+            process.stdout.write(' Total: ' + dataSize + '\n');
+            process.stdout.write(' Ratio: ' + verbDoneRatio + '\n');
         }
 
         osmxmlParser.write(chunk);
@@ -97,7 +97,7 @@ case 'streamxml':
     .on('end', function() {
 
         if (argv.v) {
-            process.stdout.write('data end');
+            process.stdout.write('data end\n');
         }
 
         osmxmlParser.end();
