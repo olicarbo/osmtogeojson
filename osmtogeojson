@@ -187,5 +187,5 @@ function sizeToString(size, digits)
 }
 
 function round(x, digits){
-  return parseFloat(x.toFixed(digits));
+  return parseFloat(Number(x).toFixed(digits));
 }
