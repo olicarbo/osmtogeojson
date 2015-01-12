@@ -180,7 +180,7 @@ osmtogeojson = function( data, options ) {
 
       if (options.verbose)
       {
-        console.log('element [' + i + '] [' + json.elements[i].type + ']');
+        console.log('element [' + i + '] [' + json.elements[i].type + '] [' + round((i + 1 / json.elements.length) * 100, 2) + ' %]');
       }
 
       switch (json.elements[i].type) {
@@ -222,6 +222,9 @@ osmtogeojson = function( data, options ) {
     if (options.verbose)
     {
       console.log('for done');
+      console.log(' nodes: ' + nodes.length);
+      console.log(' ways: ' + ways.length);
+      console.log(' relations: ' + rels.length);
     }
 
     return _convert2geoJSON(nodes,ways,rels);
@@ -1009,6 +1012,10 @@ osmtogeojson = function( data, options ) {
     return false;
   }
 };
+
+function round(x, digits){
+  return parseFloat(Number(x).toFixed(digits));
+}
 
 // for backwards compatibility
 osmtogeojson.toGeojson = osmtogeojson;
