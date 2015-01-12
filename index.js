@@ -180,7 +180,7 @@ osmtogeojson = function( data, options ) {
 
       if (options.verbose)
       {
-        console.log('element [' + i + '] [' + json.elements[i].type + '] [' + round((i + 1 / json.elements.length) * 100, 2) + ' %]');
+        console.log('element [' + i + '] [' + json.elements[i].type + '] [' + round(((i + 1) / json.elements.length) * 100, 2) + ' %]');
       }
 
       switch (json.elements[i].type) {
