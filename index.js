@@ -37,6 +37,12 @@ osmtogeojson = function( data, options ) {
   return result;
 
   function _overpassJSON2geoJSON(json) {
+
+    if (options.verbose)
+    {
+      console.log('_overpassJSON2geoJSON');
+    }
+
     // sort elements
     var nodes = new Array();
     var ways  = new Array();
@@ -162,9 +168,21 @@ osmtogeojson = function( data, options ) {
         }
       });
     }
+
+    if (options.verbose)
+    {
+      console.log('for [' + json.elements.length + '] ');
+    }
+
     // create copies of individual json objects to make sure the original data doesn't get altered
     // todo: cloning is slow: see if this can be done differently!
     for (var i=0;i<json.elements.length;i++) {
+
+      if (options.verbose)
+      {
+        console.log('element [' + i + '] [' + json.elements[i].type + ']');
+      }
+
       switch (json.elements[i].type) {
       case "node":
         var node = json.elements[i];
@@ -200,9 +218,21 @@ osmtogeojson = function( data, options ) {
       // type=area (from coord-query) is an example for this case.
       }
     }
+
+    if (options.verbose)
+    {
+      console.log('for done');
+    }
+
     return _convert2geoJSON(nodes,ways,rels);
   }
   function _osmXML2geoJSON(xml) {
+
+    if (options.verbose)
+    {
+      console.log('_osmXML2geoJSON');
+    }
+
     // sort elements
     var nodes = new Array();
     var ways  = new Array();
@@ -331,6 +361,12 @@ osmtogeojson = function( data, options ) {
         }
       });
     }
+
+    if (options.verbose)
+    {
+      console.log('Nodes');
+    }
+
     // nodes
     _.each( xml.getElementsByTagName('node'), function( node, i ) {
       var tags = {};
@@ -352,6 +388,12 @@ osmtogeojson = function( data, options ) {
         nodeObject.tags = tags;
       nodes.push(nodeObject);
     });
+
+    if (options.verbose)
+    {
+      console.log('Ways');
+    }
+
     // ways
     var centroid,bounds;
     _.each( xml.getElementsByTagName('way'), function( way, i ) {
@@ -389,6 +431,12 @@ osmtogeojson = function( data, options ) {
         boundsGeometry(wayObject,bounds);
       ways.push(wayObject);
     });
+
+    if (options.verbose)
+    {
+      console.log('Relations');
+    }
+
     // relations
     _.each( xml.getElementsByTagName('relation'), function( relation, i ) {
       var tags = {};
@@ -432,6 +480,11 @@ osmtogeojson = function( data, options ) {
   }
   function _convert2geoJSON(nodes,ways,rels) {
 
+    if (options.verbose)
+    {
+      console.log('_convert2geoJSON');
+    }
+
     // helper function that checks if there are any tags other than "created_by", "source", etc. or any tag provided in ignore_tags
     function has_interesting_tags(t, ignore_tags) {
       if (typeof ignore_tags !== "object")
@@ -457,6 +510,11 @@ osmtogeojson = function( data, options ) {
         if (res[k] === undefined)
           delete res[k];
       return res;
+    }
+
+    if (options.verbose)
+    {
+      console.log('filter');
     }
 
     // some data processing (e.g. filter nodes only used for ways)
@@ -545,11 +603,23 @@ osmtogeojson = function( data, options ) {
         });
       }
     }
+
+    if (options.verbose)
+    {
+      console.log('construct');
+    }
+
     // construct geojson
     var geojson;
     var geojsonnodes = {
       "type"     : "FeatureCollection",
       "features" : new Array()};
+
+    if (options.verbose)
+    {
+      console.log('pois');
+    }
+
     for (i=0;i<pois.length;i++) {
       if (typeof pois[i].lon == "undefined" || typeof pois[i].lat == "undefined") {
         if (options.verbose) console.warn('POI',pois[i].type+'/'+pois[i].id,'ignored because it lacks coordinates');
@@ -580,6 +650,12 @@ osmtogeojson = function( data, options ) {
     var geojsonpolygons = {
       "type"     : "FeatureCollection",
       "features" : new Array()};
+
+    if (options.verbose)
+    {
+      console.log('rels');
+    }
+
     // process multipolygons
     for (var i=0;i<rels.length;i++) {
       if ((typeof rels[i].tags != "undefined") &&
@@ -813,6 +889,12 @@ osmtogeojson = function( data, options ) {
         }
       }
     }
+
+    if (options.verbose)
+    {
+      console.log('ways');
+    }
+
     // process lines and polygons
     for (var i=0;i<ways.length;i++) {
       if (!_.isArray(ways[i].nodes)) {
