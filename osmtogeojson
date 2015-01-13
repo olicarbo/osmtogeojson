@@ -47,14 +47,16 @@ if (format === 'json' && filename) {
 // fall back to autodetection if still no format
 if (!format) format = 'auto';
 
+var startDate = Date.now();
+var lastDate = startDate;
 var dataSize = 0;
 var totalSize = filename ? fs.statSync(filename).size : 0;
 if (argv.v) {
     var verbFilename = filename ? filename : 'stdin';
-    process.stdout.write('\n\n---- Start processing ['+ verbFilename +'] ----\n');
-    process.stdout.write(' Format: ' + format + '\n');
-    process.stdout.write(' Size: ' + sizeToString(totalSize, 2) + '\n');
-    process.stdout.write('---- ---- ---- ---- ---- ---- ---- ---- ---- ----\n\n');
+    console.warn('\n\n---- Start processing ['+ verbFilename +'] ----');
+    console.warn(' Format: ' + format + '');
+    console.warn(' Size: ' + sizeToString(totalSize, 2) + '');
+    console.warn('---- ---- ---- ---- ---- ---- ---- ---- ---- ----\n');
 }
 
 var datastream = (filename ? fs.createReadStream(filename) : process.stdin);
@@ -87,9 +89,8 @@ case 'streamxml':
         dataSize += chunk.length;
         if (argv.v) {
             var verbDoneRatio = totalSize > 0 ? round((dataSize / totalSize) * 100, 2) + ' %': '- %';
-            process.stdout.write('data [' + sizeToString(chunk.length, 2) + ']\n');
-            process.stdout.write(' Total: ' + sizeToString(dataSize, 2) + '\n');
-            process.stdout.write(' Ratio: ' + verbDoneRatio + '\n');
+            console.warn('data [' + sizeToString(chunk.length, 2) + '] [' + sizeToString(dataSize, 2) + '] [' + verbDoneRatio + '] [%dms]', Date.now() - lastDate);
+            lastDate = Date.now();
         }
 
         osmxmlParser.write(chunk);
@@ -97,7 +98,7 @@ case 'streamxml':
     .on('end', function() {
 
         if (argv.v) {
-            process.stdout.write('data end\n');
+            console.warn('data end [%dms]', Date.now() - startDate);
         }
 
         osmxmlParser.end();
@@ -145,7 +146,7 @@ function legacyParsers(data) {
 function convert(data) {
 
     if (argv.v) {
-            process.stdout.write('convert\n');
+            console.warn('convert');
     }
 
     var geojson = osmtogeojson(data, {
@@ -157,8 +158,9 @@ function convert(data) {
 
 function output(geojson) {
 
+    var outputStartDate = Date.now();
     if (argv.v) {
-            process.stdout.write('output\n');
+            console.warn('output');
     }
 
     // this is much faster than a simple JSON.stringify of the whole geojson
@@ -174,6 +176,9 @@ function output(geojson) {
             process.stdout.write(',\n');
     });
     process.stdout.write('\n]\n}\n');
+
+    console.warn('Output end [%dms]', Date.now() - outputStartDate);
+    console.warn('Processing end [%dms]', Date.now() - startDate);
 }
 
 function sizeToString(size, digits)

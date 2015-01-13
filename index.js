@@ -40,7 +40,7 @@ osmtogeojson = function( data, options ) {
 
     if (options.verbose)
     {
-      console.log('_overpassJSON2geoJSON');
+      console.warn('_overpassJSON2geoJSON');
     }
 
     // sort elements
@@ -121,11 +121,13 @@ osmtogeojson = function( data, options ) {
         if (ways.some(function (way) { // todo: this is slow :(
           return way.type == "way" && way.id == id;
         })) return;
+
         var geometryWay = {
           type: "way",
           id:   id,
           nodes:[]
         }
+
         function addFullGeometryWayPseudoNode(lat,lon) {
           // todo? do not save the same pseudo node multiple times
           var geometryPseudoNode = {
@@ -137,6 +139,7 @@ osmtogeojson = function( data, options ) {
           geometryWay.nodes.push(geometryPseudoNode.id);
           nodes.push(geometryPseudoNode);
         }
+
         geometry.forEach(function(nd) {
           if (nd) {
             addFullGeometryWayPseudoNode(
@@ -147,8 +150,12 @@ osmtogeojson = function( data, options ) {
             geometryWay.nodes.push(undefined);
           }
         });
+
         ways.push(geometryWay);
       }
+
+      var startDate = Date.now();
+
       rel.members.forEach(function(member, i) {
         if (member.type == "node") {
           if (member.lat) {
@@ -169,24 +176,31 @@ osmtogeojson = function( data, options ) {
       });
     }
 
+    var startDate = Date.now();
+    var lastDate = startDate;
+    var durationNodes = 0;
+    var durationWays = 0;
+    var durationRelations = 0;
+
     if (options.verbose)
     {
-      console.log('for [' + json.elements.length + '] ');
+      console.warn('for [' + json.elements.length + '] ');
     }
 
     // create copies of individual json objects to make sure the original data doesn't get altered
     // todo: cloning is slow: see if this can be done differently!
     for (var i=0;i<json.elements.length;i++) {
 
-      if (options.verbose)
-      {
-        console.log('element [' + i + '] [' + json.elements[i].type + '] [' + round(((i + 1) / json.elements.length) * 100, 2) + ' %]');
-      }
+      var duration = 0;
 
       switch (json.elements[i].type) {
       case "node":
         var node = json.elements[i];
         nodes.push(node);
+
+        duration = (Date.now() - lastDate);
+        durationNodes += duration;
+        lastDate = Date.now();
       break;
       case "way":
         var way = _.clone(json.elements[i]);
@@ -198,6 +212,10 @@ osmtogeojson = function( data, options ) {
           fullGeometryWay(way);
         else if (way.bounds)
           boundsGeometry(way);
+
+        duration = (Date.now() - lastDate);
+        durationWays += duration;
+        lastDate = Date.now();
       break;
       case "relation":
         var rel = _.clone(json.elements[i]);
@@ -205,7 +223,7 @@ osmtogeojson = function( data, options ) {
         rels.push(rel);
         var has_full_geometry = rel.members && rel.members.some(function (member) {
           return member.type == "node" && member.lat ||
-                 member.type == "way"  && member.geometry
+                 member.type == "way"  && member.geometry && member.geometry.length > 0
         });
         if (rel.center) 
           centerGeometry(rel);
@@ -213,18 +231,28 @@ osmtogeojson = function( data, options ) {
           fullGeometryRelation(rel);
         else if (rel.bounds)
           boundsGeometry(rel);
+
+        duration = (Date.now() - lastDate);
+        durationRelations += duration;
+        lastDate = Date.now();
       break;
       default:
       // type=area (from coord-query) is an example for this case.
+      }
+
+      if (options.verbose)
+      {
+        console.warn('element [' + i + '] [' + json.elements[i].type + '] [' + round(((i + 1) / json.elements.length) * 100, 2) + ' %] [%dms]', duration);
       }
     }
 
     if (options.verbose)
     {
-      console.log('for done');
-      console.log(' nodes: ' + nodes.length);
-      console.log(' ways: ' + ways.length);
-      console.log(' relations: ' + rels.length);
+      var totalDuration = Date.now() - startDate;
+      console.warn('for done [%dms]', totalDuration);
+      console.warn(' nodes [%dms]: ' + nodes.length, durationNodes);
+      console.warn(' ways [%dms]: ' + ways.length, durationWays);
+      console.warn(' relations [%dms]: ' + rels.length, durationRelations);
     }
 
     return _convert2geoJSON(nodes,ways,rels);
@@ -233,7 +261,7 @@ osmtogeojson = function( data, options ) {
 
     if (options.verbose)
     {
-      console.log('_osmXML2geoJSON');
+      console.warn('_osmXML2geoJSON');
     }
 
     // sort elements
@@ -367,7 +395,7 @@ osmtogeojson = function( data, options ) {
 
     if (options.verbose)
     {
-      console.log('Nodes');
+      console.warn('Nodes');
     }
 
     // nodes
@@ -394,7 +422,7 @@ osmtogeojson = function( data, options ) {
 
     if (options.verbose)
     {
-      console.log('Ways');
+      console.warn('Ways');
     }
 
     // ways
@@ -437,7 +465,7 @@ osmtogeojson = function( data, options ) {
 
     if (options.verbose)
     {
-      console.log('Relations');
+      console.warn('Relations');
     }
 
     // relations
@@ -483,9 +511,10 @@ osmtogeojson = function( data, options ) {
   }
   function _convert2geoJSON(nodes,ways,rels) {
 
+    var startDate = Date.now();
     if (options.verbose)
     {
-      console.log('_convert2geoJSON');
+      console.warn('_convert2geoJSON');
     }
 
     // helper function that checks if there are any tags other than "created_by", "source", etc. or any tag provided in ignore_tags
@@ -517,7 +546,7 @@ osmtogeojson = function( data, options ) {
 
     if (options.verbose)
     {
-      console.log('filter');
+      console.warn('filter');
     }
 
     // some data processing (e.g. filter nodes only used for ways)
@@ -609,7 +638,7 @@ osmtogeojson = function( data, options ) {
 
     if (options.verbose)
     {
-      console.log('construct');
+      console.warn('construct');
     }
 
     // construct geojson
@@ -620,7 +649,7 @@ osmtogeojson = function( data, options ) {
 
     if (options.verbose)
     {
-      console.log('pois');
+      console.warn('pois');
     }
 
     for (i=0;i<pois.length;i++) {
@@ -656,7 +685,7 @@ osmtogeojson = function( data, options ) {
 
     if (options.verbose)
     {
-      console.log('rels');
+      console.warn('rels');
     }
 
     // process multipolygons
@@ -895,7 +924,7 @@ osmtogeojson = function( data, options ) {
 
     if (options.verbose)
     {
-      console.log('ways');
+      console.warn('ways');
     }
 
     // process lines and polygons
@@ -980,6 +1009,9 @@ osmtogeojson = function( data, options ) {
     }
     // fix polygon winding
     geojson = rewind(geojson, true /*remove for geojson-rewind >0.1.0*/);
+
+    console.warn('Convert end [%dms]', Date.now() - startDate);
+
     return geojson;
   }
   function _isPolygonFeature( tags ) {
