@@ -57,6 +57,7 @@ if (argv.v) {
     console.warn('\n\n---- Start processing ['+ verbFilename +'] ----');
     console.warn(' Format: ' + format + '');
     console.warn(' Size: ' + sizeToString(totalSize, 2) + '');
+    console.warn(' Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
     console.warn('---- ---- ---- ---- ---- ---- ---- ---- ---- ----\n');
 }
 
@@ -90,7 +91,7 @@ case 'streamxml':
         dataSize += chunk.length;
         if (argv.v) {
             var verbDoneRatio = totalSize > 0 ? round((dataSize / totalSize) * 100, 2) + ' %': '- %';
-            console.warn('data [' + sizeToString(chunk.length, 2) + '] [' + sizeToString(dataSize, 2) + '] [' + verbDoneRatio + '] [%dms]', Date.now() - lastDate);
+            console.warn('data [' + sizeToString(chunk.length, 2) + '] [' + sizeToString(dataSize, 2) + '] [' + verbDoneRatio + '] [%dms] Mem[%s %s/%s]', Date.now() - lastDate, sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
             lastDate = Date.now();
         }
 
@@ -99,7 +100,7 @@ case 'streamxml':
     .on('end', function() {
 
         if (argv.v) {
-            console.warn('data end [%dms]', Date.now() - startDate);
+            console.warn('data end [%dms] Mem[%s %s/%s]', Date.now() - startDate, sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
         }
 
         osmxmlParser.end();
@@ -147,7 +148,7 @@ function legacyParsers(data) {
 function convert(data) {
 
     if (argv.v) {
-            console.warn('convert');
+        console.warn('convert Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
     }
 
     var geojson = osmtogeojson(data, {
@@ -161,7 +162,7 @@ function output(geojson) {
 
     var outputStartDate = Date.now();
     if (argv.v) {
-            console.warn('output');
+        console.warn('output Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
     }
 
     // this is much faster than a simple JSON.stringify of the whole geojson
@@ -195,7 +196,7 @@ function output(geojson) {
     }
 
     console.warn('Output end [%dms]', Date.now() - outputStartDate);
-    console.warn('Processing end [%dms]', Date.now() - startDate);
+    console.warn('Processing end [%dms] Mem[%s %s/%s]', Date.now() - startDate, sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
 }
 
 function sizeToString(size, digits)
