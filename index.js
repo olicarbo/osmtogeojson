@@ -558,6 +558,12 @@ osmtogeojson = function( data, options ) {
         // if (options.verbose) console.warn('Node',nodes[i].type+'/'+nodes[i].id,'ignored because it has no coordinates');
         continue; // ignore nodes without coordinates (e.g. returned by an ids_only query)
       }
+
+      if (options.verbose)
+      {
+        console.warn('filter 1.1 [' + i + ':' + nodes[i].id + '] Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
+      }
+
       nodeids[nodes[i].id] = nodes[i];
     }
 
