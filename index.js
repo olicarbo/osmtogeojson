@@ -548,7 +548,7 @@ osmtogeojson = function( data, options ) {
 
     if (options.verbose)
     {
-      console.warn('filter Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
+      console.warn('filter 1 Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
     }
 
     // some data processing (e.g. filter nodes only used for ways)
@@ -560,12 +560,24 @@ osmtogeojson = function( data, options ) {
       }
       nodeids[nodes[i].id] = nodes[i];
     }
+
+    if (options.verbose)
+    {
+      console.warn('filter 2 Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
+    }
+
     var poinids = new Object();
     for (var i=0;i<nodes.length;i++) {
       if (typeof nodes[i].tags != 'undefined' &&
           has_interesting_tags(nodes[i].tags)) // this checks if the node has any tags other than "created_by"
         poinids[nodes[i].id] = true;
     }
+
+    if (options.verbose)
+    {
+      console.warn('filter 3 Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
+    }
+
     for (var i=0;i<rels.length;i++) {
       if (!_.isArray(rels[i].members)) {
         // if (options.verbose) console.warn('Relation',rels[i].type+'/'+rels[i].id,'ignored because it has no members');
@@ -576,6 +588,12 @@ osmtogeojson = function( data, options ) {
           poinids[rels[i].members[j].ref] = true;
       }
     }
+
+    if (options.verbose)
+    {
+      console.warn('filter 4 Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
+    }
+
     var wayids = new Object();
     var waynids = new Object();
     for (var i=0;i<ways.length;i++) {
@@ -589,12 +607,24 @@ osmtogeojson = function( data, options ) {
         ways[i].nodes[j] = nodeids[ways[i].nodes[j]];
       }
     }
+
+    if (options.verbose)
+    {
+      console.warn('filter 5 Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
+    }
+
     var pois = new Array();
     for (var i=0;i<nodes.length;i++) {
       if ((!waynids[nodes[i].id]) ||
           (poinids[nodes[i].id]))
         pois.push(nodes[i]);
     }
+
+    if (options.verbose)
+    {
+      console.warn('filter 6 Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
+    }
+
     var relids = new Array();
     for (var i=0;i<rels.length;i++) {
       if (!_.isArray(rels[i].members)) {
@@ -603,6 +633,12 @@ osmtogeojson = function( data, options ) {
       }
       relids[rels[i].id] = rels[i];
     }
+
+    if (options.verbose)
+    {
+      console.warn('filter 7 Mem[%s %s/%s]', sizeToString(process.memoryUsage().rss), sizeToString(process.memoryUsage().heapUsed), sizeToString(process.memoryUsage().heapTotal));
+    }
+
     var relsmap = {node: {}, way: {}, relation: {}};
     for (var i=0;i<rels.length;i++) {
       if (!_.isArray(rels[i].members)) {
